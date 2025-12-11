@@ -1,0 +1,11 @@
+service:
+  port: 8080
+  mode: debug
+  write_timeout: 60
+  read_timeout: 60
+  close_timeout: 5
+  limit_number: 100
+
+log:
+  level: debug
+  file_path: logs/app.log

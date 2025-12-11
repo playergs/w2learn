@@ -1,0 +1,13 @@
+# Binaries
+/bin/
+*.exe
+
+# Logs and temp
+logs/
+*.log
+tmp/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
