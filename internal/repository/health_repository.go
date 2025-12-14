@@ -1,7 +1,8 @@
-package respository
+package repository
 
 import (
 	"context"
+	"w2learn/pkg/database"
 	"w2learn/pkg/def"
 )
 
@@ -19,5 +20,23 @@ func NewHealthRepository() HealthRepository {
 }
 
 func (h *healthRepository) GetDatabaseStatus(ctx context.Context) (int, error) {
-	return def.HealthStatusCheckError, nil
+	db := database.GetDB()
+
+	if db == nil {
+		return def.HealthStatusCheckError, nil
+	}
+
+	baseDB, err := db.DB()
+
+	if err != nil {
+		return def.HealthStatusCheckError, err
+	}
+
+	err = baseDB.PingContext(ctx)
+
+	if err != nil {
+		return def.HealthStatusCheckError, err
+	}
+
+	return def.HealthStatusCheckOK, nil
 }

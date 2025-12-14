@@ -25,8 +25,9 @@ const (
 )
 
 type Config struct {
-	Server ServerConfig `mapstructure:"service"`
-	Log    LogConfig    `mapstructure:"log"`
+	Server   ServerConfig   `mapstructure:"service"`
+	Log      LogConfig      `mapstructure:"log"`
+	Database DatabaseConfig `mapstructure:"database"`
 }
 
 type ServerConfig struct {
@@ -40,6 +41,20 @@ type ServerConfig struct {
 
 	//TODO: 待添加Gin中间件
 	LimitNumber int `mapstructure:"limit_number"`
+}
+
+type DatabaseConfig struct {
+	Host         string `mapstructure:"host"`
+	Port         int    `mapstructure:"port"`
+	User         string `mapstructure:"user"`
+	Password     string `mapstructure:"password"`
+	DBName       string `mapstructure:"dbname"`
+	SSLMode      string `mapstructure:"sslmode"`
+	MaxIdleConns int    `mapstructure:"max_idle_conns"`
+	MaxOpenConns int    `mapstructure:"max_open_conns"`
+	MaxLifeTime  int    `mapstructure:"max_life_time"`
+	LogLevel     string `mapstructure:"log_level"`
+	AutoMigrate  bool   `mapstructure:"auto_migrate"`
 }
 
 type LogConfig struct {

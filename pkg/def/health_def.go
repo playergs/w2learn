@@ -11,4 +11,5 @@ const (
 const (
 	HealthStatusRequestFlagNoCheck  = 0b00
 	HealthStatusRequestFlagDatabase = 0b01
+	HealthStatusRequestFlagAllCheck = 0b11
 )

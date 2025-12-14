@@ -2,8 +2,8 @@ package controller
 
 import (
 	"strconv"
-	"w2learn/internal/model"
 	"w2learn/internal/service"
+	"w2learn/pkg/def"
 	"w2learn/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -46,5 +46,12 @@ func (ctrl *healthController) HealthCheckWithFlag(c *gin.Context) {
 }
 
 func (ctrl *healthController) HealthCheck(c *gin.Context) {
-	response.Success(c, model.GetDefaultHealthModel())
+	health, err := ctrl.healthService.GetHealth(c, def.HealthStatusRequestFlagAllCheck)
+
+	if err != nil {
+		response.Error(c, err)
+		return
+	}
+
+	response.Success(c, health)
 }

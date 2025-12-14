@@ -11,9 +11,11 @@ import (
 	"time"
 	"w2learn/internal/config"
 	"w2learn/internal/controller"
-	"w2learn/internal/respository"
+	"w2learn/internal/model"
+	"w2learn/internal/repository"
 	"w2learn/internal/router"
 	"w2learn/internal/service"
+	"w2learn/pkg/database"
 	"w2learn/pkg/logger"
 
 	"go.uber.org/zap"
@@ -81,17 +83,66 @@ func main() {
 
 	logger.Info("Init Log End")
 
-	logger.Info("Init Router Start")
-	logger.Info("Init Health Router Start")
+	logger.Info("Init Database Start")
 
-	healthRepo := respository.NewHealthRepository()
+	db, err := database.NewPostgresDB(&database.PostgresConfig{
+		Host:         cfg.Database.Host,
+		Port:         cfg.Database.Port,
+		User:         cfg.Database.User,
+		Password:     cfg.Database.Password,
+		DBName:       cfg.Database.DBName,
+		SSLMode:      cfg.Database.SSLMode,
+		MaxIdleConns: cfg.Database.MaxIdleConns,
+		MaxOpenConns: cfg.Database.MaxOpenConns,
+		MaxLifeTime:  cfg.Database.MaxLifeTime,
+		LogLevel:     cfg.Database.LogLevel,
+	})
+
+	if err != nil {
+		logger.Fatal("Init Database Fail", zap.Error(err))
+		return
+	}
+
+	defer func() {
+		err := database.Close()
+		if err != nil {
+			logger.Fatal("Close Database Fail", zap.Error(err))
+			return
+		}
+	}()
+
+	if cfg.Database.AutoMigrate {
+		logger.Info("AutoMigrate Start")
+		err := db.AutoMigrate(&model.User{}, &model.Habit{})
+
+		if err != nil {
+			logger.Fatal("AutoMigrate Fail", zap.Error(err))
+			return
+		}
+		logger.Info("AutoMigrate End")
+	}
+	logger.Info("Init Database End")
+
+	logger.Info("Init Repo Start")
+	healthRepo := repository.NewHealthRepository()
+	userRepo := repository.NewUserRepository(db)
+	habitRepo := repository.NewHabitRepository(db)
+	logger.Info("Init Repo End")
+
+	logger.Info("Init Service Start")
 	healthService := service.NewHealthService(healthRepo)
-	healthController := controller.NewHealthController(healthService)
+	userService := service.NewUserService(userRepo, habitRepo)
+	habitService := service.NewHabitService(habitRepo, userRepo)
+	logger.Info("Init Service End")
 
-	logger.Info("Init Health Router End")
+	logger.Info("Init Controller Start")
+	healthController := controller.NewHealthController(healthService)
+	userController := controller.NewUserController(userService)
+	habitController := controller.NewHabitsController(habitService)
+	logger.Info("Init Controller End")
 
 	logger.Info("Setup Router Start")
-	r := router.SetupRouter(cfg, healthController)
+	r := router.SetupRouter(cfg, healthController, userController, habitController)
 
 	if r == nil {
 		logger.Fatal("New router err")

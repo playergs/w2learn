@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"w2learn/internal/model"
-	"w2learn/internal/respository"
+	"w2learn/internal/repository"
 	"w2learn/pkg/def"
 )
 
@@ -14,10 +14,10 @@ type HealthService interface {
 }
 
 type healthService struct {
-	healthRepo respository.HealthRepository
+	healthRepo repository.HealthRepository
 }
 
-func NewHealthService(repository respository.HealthRepository) HealthService {
+func NewHealthService(repository repository.HealthRepository) HealthService {
 	return &healthService{
 		healthRepo: repository,
 	}
