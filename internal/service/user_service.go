@@ -6,6 +6,7 @@ import (
 	"w2learn/internal/dto"
 	"w2learn/internal/model"
 	"w2learn/internal/repository"
+	"w2learn/internal/utils"
 	"w2learn/pkg/logger"
 
 	"go.uber.org/zap"
@@ -48,9 +49,20 @@ func (s *userService) CreateUser(ctx context.Context, req *dto.CreateUserRequest
 		return nil, errors.New("user already exists")
 	}
 
+	if req.Password == "" {
+		return nil, errors.New("password is empty")
+	}
+
+	salt, err := utils.GenerateStringSalt(16)
+
+	if err != nil || salt == "" {
+		return nil, errors.New("failed to generate salt")
+	}
+
 	user = &model.User{
 		Username: req.Username,
-		Password: req.Password,
+		Password: utils.HashString(req.Password, salt),
+		Salt:     salt,
 		Status:   0,
 		Habits:   nil,
 	}

@@ -1,17 +1,17 @@
 package dto
 
 type CreateHabitRequest struct {
-	UserID uint64 `json:"user_id"`
-	Name   string `json:"name"`
-	Info   string `json:"info"`
+	UserID uint64 `json:"user_id" binding:"required"`
+	Name   string `json:"name" binding:"required"`
+	Info   string `json:"info" binding:"required"`
 }
 
 type UpdateHabitRequest struct {
-	Name string `json:"name"`
-	Info string `json:"info"`
+	Name string `json:"name" binding:"required"`
+	Info string `json:"info" binding:"required"`
 }
 
 type DeleteHabitRequest struct {
-	UserID  uint64 `json:"user_id"`
-	HabitID uint64 `json:"habit_id"`
+	UserID  uint64 `json:"user_id" binding:"required"`
+	HabitID uint64 `json:"habit_id" binding:"required"`
 }

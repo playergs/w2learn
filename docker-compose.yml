@@ -3,7 +3,6 @@ version: '3.8'
 services:
   postgres:
     image: postgres:18.1
-    restart: always
     container_name: w2learn-postgres
     environment:
       POSTGRES_DB: w2learn
@@ -19,5 +18,19 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:8.4.0
+    container_name: w2learn-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   postgres_data:
+  redis_data:

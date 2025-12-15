@@ -15,6 +15,7 @@ import (
 	"w2learn/internal/repository"
 	"w2learn/internal/router"
 	"w2learn/internal/service"
+	"w2learn/internal/utils"
 	"w2learn/pkg/database"
 	"w2learn/pkg/logger"
 
@@ -123,6 +124,38 @@ func main() {
 	}
 	logger.Info("Init Database End")
 
+	logger.Info("Init Utils Start")
+	utils.InitJwt(cfg.Session.Secret)
+	logger.Info("Init Utils End")
+
+	logger.Info("Init Redis Start")
+	redis, err := database.NewRedis(&database.RedisConfig{
+		Addr:         cfg.Redis.Addr,
+		Password:     cfg.Redis.Password,
+		DB:           cfg.Redis.DB,
+		PoolSize:     cfg.Redis.PoolSize,
+		MinIdleConns: cfg.Redis.MinIdleConns,
+		MaxRetries:   cfg.Redis.MaxRetries,
+		DialTimeout:  time.Duration(cfg.Redis.DialTimeout) * time.Second,
+		ReadTimeout:  time.Duration(cfg.Redis.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.Redis.WriteTimeout) * time.Second,
+	})
+
+	if err != nil {
+		logger.Fatal("Init Redis Fail", zap.Error(err))
+		return
+	}
+
+	defer func() {
+		err := database.CloseRedis()
+
+		if err != nil {
+			logger.Fatal("Close Redis Fail", zap.Error(err))
+			return
+		}
+	}()
+	logger.Info("Init Redis End")
+
 	logger.Info("Init Repo Start")
 	healthRepo := repository.NewHealthRepository()
 	userRepo := repository.NewUserRepository(db)
@@ -133,16 +166,18 @@ func main() {
 	healthService := service.NewHealthService(healthRepo)
 	userService := service.NewUserService(userRepo, habitRepo)
 	habitService := service.NewHabitService(habitRepo, userRepo)
+	authService := service.NewAuthService(userRepo, redis)
 	logger.Info("Init Service End")
 
 	logger.Info("Init Controller Start")
 	healthController := controller.NewHealthController(healthService)
 	userController := controller.NewUserController(userService)
 	habitController := controller.NewHabitsController(habitService)
+	authController := controller.NewAuthController(authService)
 	logger.Info("Init Controller End")
 
 	logger.Info("Setup Router Start")
-	r := router.SetupRouter(cfg, healthController, userController, habitController)
+	r := router.SetupRouter(cfg, redis, healthController, userController, habitController, authController)
 
 	if r == nil {
 		logger.Fatal("New router err")

@@ -28,6 +28,8 @@ type Config struct {
 	Server   ServerConfig   `mapstructure:"service"`
 	Log      LogConfig      `mapstructure:"log"`
 	Database DatabaseConfig `mapstructure:"database"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	Session  SessionConfig  `mapstructure:"session"`
 }
 
 type ServerConfig struct {
@@ -55,6 +57,22 @@ type DatabaseConfig struct {
 	MaxLifeTime  int    `mapstructure:"max_life_time"`
 	LogLevel     string `mapstructure:"log_level"`
 	AutoMigrate  bool   `mapstructure:"auto_migrate"`
+}
+
+type RedisConfig struct {
+	Addr         string `mapstructure:"addr"`
+	Password     string `mapstructure:"password"`
+	DB           int    `mapstructure:"db"`
+	PoolSize     int    `mapstructure:"pool_size"`
+	MinIdleConns int    `mapstructure:"min_idle_conns"`
+	MaxRetries   int    `mapstructure:"max_retries"`
+	DialTimeout  int    `mapstructure:"dial_timeout"`
+	ReadTimeout  int    `mapstructure:"read_timeout"`
+	WriteTimeout int    `mapstructure:"write_timeout"`
+}
+
+type SessionConfig struct {
+	Secret string `mapstructure:"secret"`
 }
 
 type LogConfig struct {

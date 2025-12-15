@@ -7,13 +7,12 @@ import (
 )
 
 type Habit struct {
-	ID        uint64         `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Name      string         `gorm:"size:64;not null" json:"name"`
-	Info      string         `gorm:"size:255;not null" json:"info"`
-	UserID    uint64         `json:"user_id"`
+	ID        uint64    `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `gorm:"size:64;not null" json:"name"`
+	Info      string    `gorm:"size:255;not null" json:"info"`
+	UserID    uint64    `json:"-"`
 }
 
 func (Habit) TableName() string {

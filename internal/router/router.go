@@ -7,13 +7,16 @@ import (
 	"w2learn/internal/middleware"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 )
 
 func SetupRouter(
 	cfg *config.Config,
+	rdb *redis.Client,
 	healthCtrl controller.HealthController,
 	userCtrl controller.UserController,
 	habitCtrl controller.HabitController,
+	authCtrl controller.AuthController,
 ) *gin.Engine {
 	if cfg == nil {
 		log.Fatal("config is nil")
@@ -37,6 +40,8 @@ func SetupRouter(
 
 	// 配置 /user 路由
 	userGroup := r.Group("/user")
+	userGroup.Use(middleware.JWTAuthMiddleware(rdb))
+
 	userGroup.GET("", userCtrl.ListUsers)
 	userGroup.POST("", userCtrl.CreateUser)
 	userGroup.GET("/i/:id", userCtrl.GetUser)
@@ -46,11 +51,19 @@ func SetupRouter(
 
 	// 配置 /habit 路由
 	habitGroup := r.Group("/habit")
+	habitGroup.Use(middleware.JWTAuthMiddleware(rdb))
+
 	habitGroup.GET("", habitCtrl.ListHabits)
 	habitGroup.POST("", habitCtrl.CreateHabit)
 	habitGroup.GET("/:id", habitCtrl.GetHabit)
 	habitGroup.PUT("/:id", habitCtrl.UpdateHabit)
 	habitGroup.DELETE("", habitCtrl.DeleteHabit)
+
+	// 配置 /auth 路由
+	authGroup := r.Group("/auth")
+	authGroup.POST("/register", authCtrl.Register)
+	authGroup.POST("/login", authCtrl.Login)
+	authGroup.POST("/logout", middleware.JWTAuthMiddleware(rdb), authCtrl.Logout)
 
 	return r
 }

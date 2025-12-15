@@ -13,6 +13,7 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 	Username  string         `gorm:"size:64;uniqueIndex;not null" json:"username" binding:"required"`
 	Password  string         `gorm:"size:128;not null" json:"-"`
+	Salt      string         `gorm:"size:128;not null" json:"-"`
 	Status    int8           `gorm:"default:1;not null" json:"status"`
 	Habits    []Habit        `gorm:"foreignkey:UserID" json:"habits"`
 }
